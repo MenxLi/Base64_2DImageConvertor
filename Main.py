@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 from base64ImageConverter import imgEncodeB64, imgDecodeB64
 
 im = plt.imread("test_img.jpg")
-b64 = imgEncodeB64(im, 8)
+b64 = imgEncodeB64(im)
+#b64 = imgEncodeB64(im, 8)
 im_rec = imgDecodeB64(b64)
 
 print("Encoded string: ", b64[:1000] + "...")

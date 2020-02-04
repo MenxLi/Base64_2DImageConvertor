@@ -16,16 +16,23 @@ class Base64_2DImageEncoder:
     CHANNEL_BYTE = 1
     BIT_BYTE = 1
     SIZE_BYTE_HALF = 3
-    def __init__(self, img, bit_len):
+    def __init__(self, img, bit_len = None):
         """
         @ bit_len: bit length of each pixel (for single channel)
         """
+        if (img.astype(int) != img).any():
+            raise Exception("Integer image is needed")
         if len(img.shape) == 2:
             self.channel = 1
         else: self.channel = img.shape[2]
         self.H = img.shape[0]
         self.W = img.shape[1]
         self.img = img
+        if bit_len == None:
+            max_value = np.max(img)
+            max_log = np.log(max_value)/np.log(2)
+            bit_len = int(np.floor(max_log) + 1)
+            print("\'bit_len\' not given, using conjectural value: ", bit_len)
         self.bit = bit_len
 
 
@@ -179,7 +186,7 @@ class Base64_2DImageDecoder:
 
 #==============================Encapsulation====================================
 
-def imgEncodeB64(img, bit):
+def imgEncodeB64(img, bit = None):
     """
     Encode image in Base64 scheme
     @ img: numpy array - int
