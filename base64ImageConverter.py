@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 
 B64_TABLE = [
@@ -19,7 +18,7 @@ class Base64_2DImageEncoder:
     SIZE_BYTE_HALF = 3
     def __init__(self, img, bit_len):
         """
-        @ bit_len: bit length of each pixel
+        @ bit_len: bit length of each pixel (for single channel)
         """
         if len(img.shape) == 2:
             self.channel = 1
@@ -176,3 +175,23 @@ class Base64_2DImageDecoder:
         bi_np = np.array([int(i) for i in binary])
         operator = np.array([2**i for i in range(len(binary))][::-1])
         return (bi_np*operator).sum()
+
+
+#==============================Encapsulation====================================
+
+def imgEncodeB64(img, bit):
+    """
+    Encode image in Base64 scheme
+    @ img: numpy array - int
+    @ bit: size for each channel of a single pixel in bit
+    """
+    encoder = Base64_2DImageEncoder(img, bit)
+    return encoder.run()
+
+def imgDecodeB64(b64_string):
+    """
+    Decoder for the imgEncodeB64
+    @ b64_string: string encoded with imgEncodeB64()
+    """
+    decoder = Base64_2DImageDecoder(b64_string)
+    return decoder.run()
