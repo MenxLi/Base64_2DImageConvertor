@@ -12,7 +12,7 @@ for i in range(len(B64_TABLE)):
 
 
 class Base64_2DImageEncoder:
-    OPERATOR = np.array([2**5, 2**4, 2**3, 2**2, 2**1, 2**0])
+    OPERATOR = np.array([2**i for i in range(6)][::-1])
     CHANNEL_BYTE = 1
     BIT_BYTE = 1
     SIZE_BYTE_HALF = 3
