@@ -4,7 +4,7 @@ Module dependence: `numpy`
 
 For an example see `Main.py`:
 
-```
+```python
 """An example for base64ImageConverter.py"""
 
 import matplotlib.pyplot as plt
