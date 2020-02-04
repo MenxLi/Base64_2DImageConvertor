@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from base64ImageConverter import imgEncodeB64, imgDecodeB64
 
 im = plt.imread("test_img.jpg")     # original image
-b64 = imgEncodeB64(im)           # ecoded string
+b64 = imgEncodeB64(im)              # ecoded string
 im_rec = imgDecodeB64(b64)          # recovered image
 
 ```
