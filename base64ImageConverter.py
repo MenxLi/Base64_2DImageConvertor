@@ -49,8 +49,8 @@ class Base64_2DImageEncoder:
         bi_im = ""
         for px in im.flatten():
             bi_im += self.decimal2Binary(px, self.bit)
-        bits = int(np.ceil(im.size/6))
-        bi_im_append = bi_im + ''.join(["0"]*(bits - im.size))
+        bits = int(np.ceil(len(bi_im)/6))*6
+        bi_im_append = bi_im + ''.join(["0"]*(bits - len(bi_im)))
         return self.binary2B64(bi_im_append)
 
     def run(self):
