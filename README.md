@@ -10,9 +10,9 @@ For an example see `Main.py`:
 import matplotlib.pyplot as plt
 from base64ImageConverter import imgEncodeB64, imgDecodeB64
 
-im = plt.imread("test_img.jpg")     # original image
-b64 = imgEncodeB64(im)              # ecoded string
-im_rec = imgDecodeB64(b64)          # recovered image
+im = plt.imread("test_img.jpg")                 # original image
+b64 = imgEncodeB64(im, show_progress = True)    # ecoded string
+im_rec = imgDecodeB64(b64)                      # recovered image
 
 ```
     
