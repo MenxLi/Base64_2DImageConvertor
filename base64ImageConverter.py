@@ -17,10 +17,11 @@ class Base64_2DImageEncoder:
     CHANNEL_BYTE = 1
     BIT_BYTE = 1
     SIZE_BYTE_HALF = 3
-    def __init__(self, img, bit_len = None, show_progress = True):
+    def __init__(self, img, bit_len = None, show_progress = False):
         """
         @ bit_len: bit length of each pixel (for single channel)
         """
+        self.show_progress = show_progress
         if (img.astype(int) != img).any():
             raise Exception("Integer image is needed")
         if len(img.shape) == 2:
@@ -49,8 +50,11 @@ class Base64_2DImageEncoder:
         """Encode one channel image"""
         # convert to binary
         bi_im = ""
-        for px in im.flatten():
-            bi_im += self.decimal2Binary(px, self.bit)
+        length = len(im.flatten())
+        for i in range(length) :
+            bi_im += self.decimal2Binary(im.flatten()[i], self.bit)
+            if self.show_progress:
+                printProgress(i+1, length, suffix = "completed")
         bits = int(np.ceil(len(bi_im)/6))*6
         bi_im_append = bi_im + ''.join(["0"]*(bits - len(bi_im)))
         return self.binary2B64(bi_im_append)
@@ -61,6 +65,8 @@ class Base64_2DImageEncoder:
         elif self.channel >1:
             result = self.calcHeader()
             for i in range(self.channel):
+                if self.show_progress:
+                    print("Encoding channel {} ".format(i))
                 result += self.encode1Channel(self.img[:,:,i])
             return result
 
@@ -188,13 +194,13 @@ class Base64_2DImageDecoder:
 
 #==============================Encapsulation====================================
 
-def imgEncodeB64(img, bit = None):
+def imgEncodeB64(img, bit = None, show_progress = False):
     """
     Encode image in Base64 scheme
     @ img: numpy array - int
     @ bit: size for each channel of a single pixel in bit
     """
-    encoder = Base64_2DImageEncoder(img, bit)
+    encoder = Base64_2DImageEncoder(img, bit, show_progress)
     return encoder.run()
 
 def imgDecodeB64(b64_string):

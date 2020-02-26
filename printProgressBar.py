@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import sys
+
 # Print iterations progress
 # https://gist.github.com/aubricus/f91fb55dc6ba5557fbab06119420dd6a
-def printProgress(iteration, total, prefix='', suffix='', decimals=1, bar_length=100):
+def printProgress(iteration, total, prefix='', suffix='', decimals=1, bar_length=50):
     """
     Call in a loop to create terminal progress bar
 
