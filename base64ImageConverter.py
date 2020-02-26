@@ -1,4 +1,5 @@
 import numpy as np
+from printProgressBar import printProgress
 
 B64_TABLE = [
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",\
@@ -16,7 +17,7 @@ class Base64_2DImageEncoder:
     CHANNEL_BYTE = 1
     BIT_BYTE = 1
     SIZE_BYTE_HALF = 3
-    def __init__(self, img, bit_len = None):
+    def __init__(self, img, bit_len = None, show_progress = True):
         """
         @ bit_len: bit length of each pixel (for single channel)
         """
@@ -32,7 +33,8 @@ class Base64_2DImageEncoder:
             max_value = np.max(img)
             max_log = np.log(max_value)/np.log(2)
             bit_len = int(np.floor(max_log) + 1)
-            print("\'bit_len\' not given, using conjectural value: ", bit_len)
+            if show_progress:
+                print("\'bit_len\' not given, using conjectural value: ", bit_len)
         self.bit = bit_len
 
 
