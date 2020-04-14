@@ -1,0 +1,6 @@
+*_test*
+*.swp
+__pycache__/
+.ccls-cache/
+*.o
+

@@ -1,5 +1,8 @@
 import numpy as np
 from printProgressBar import printProgress
+import ctypes
+
+clib = ctypes.cdll.LoadLibrary("./c_utils.so")
 
 B64_TABLE = [
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",\
@@ -11,6 +14,11 @@ DECODE_DIC = {}
 for i in range(len(B64_TABLE)):
     DECODE_DIC[B64_TABLE[i]] = i
 
+def getIntPtr(arr):
+    if not arr.dtype == np.dtype(np.int32):
+        print("data type error")
+    cIntP= ctypes.POINTER(ctypes.c_int)
+    return arr.ctypes.data_as(cIntP)
 
 class Base64_2DImageEncoder:
     OPERATOR = np.array([2**i for i in range(6)][::-1])
@@ -49,12 +57,24 @@ class Base64_2DImageEncoder:
     def encode1Channel(self, im):
         """Encode one channel image"""
         # convert to binary
+        #  bi_im = ""
+        #  length = len(im.flatten())
+        #  for i in range(length) :
+        #      bi_im += self.decimal2Binary(im.flatten()[i], self.bit)
+        #      if self.show_progress:
+        #          printProgress(i+1, length, suffix = "completed")
+
+        # Using ctypes
         bi_im = ""
-        length = len(im.flatten())
-        for i in range(length) :
-            bi_im += self.decimal2Binary(im.flatten()[i], self.bit)
-            if self.show_progress:
-                printProgress(i+1, length, suffix = "completed")
+        step = 500      #chunk image
+        flattened_im = im.ravel()
+        for i in range(0, im.size, step):
+            chunk = flattened_im[i:i+step].astype(np.int32)
+            bi_chunk = np.zeros(len(chunk)*self.bit, np.int32)
+            clib.intArray2Bool(getIntPtr(chunk), ctypes.c_int(len(chunk)),
+                               ctypes.c_int(self.bit), getIntPtr(bi_chunk))
+            bi_im +=  "".join(bi_chunk.astype(str))
+
         bits = int(np.ceil(len(bi_im)/6))*6
         bi_im_append = bi_im + ''.join(["0"]*(bits - len(bi_im)))
         return self.binary2B64(bi_im_append)
