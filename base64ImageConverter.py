@@ -15,10 +15,15 @@ for i in range(len(B64_TABLE)):
     DECODE_DIC[B64_TABLE[i]] = i
 
 def getIntPtr(arr):
-    if not arr.dtype == np.dtype(np.int32):
+    if not arr.dtype == np.dtype(np.intc):
         print("data type error")
     cIntP= ctypes.POINTER(ctypes.c_int)
     return arr.ctypes.data_as(cIntP)
+def getCharPtr(arr):
+    #  if not arr.dtype == np.dtype(np.int32):
+        #  print("data type error")
+    cCharP= ctypes.POINTER(ctypes.c_char)
+    return arr.ctypes.data_as(cCharP)
 
 class Base64_2DImageEncoder:
     OPERATOR = np.array([2**i for i in range(6)][::-1])
@@ -65,19 +70,22 @@ class Base64_2DImageEncoder:
         #          printProgress(i+1, length, suffix = "completed")
 
         # Using ctypes
-        bi_im = ""
-        step = 500      #chunk image
+        bi_arr = np.array([])
+        step = 800      #chunk image
         flattened_im = im.ravel()
         for i in range(0, im.size, step):
-            chunk = flattened_im[i:i+step].astype(np.int32)
-            bi_chunk = np.zeros(len(chunk)*self.bit, np.int32)
+            chunk = flattened_im[i:i+step].astype(np.intc)
+            bi_chunk = np.zeros(len(chunk)*self.bit, np.intc)
             clib.intArray2Bool(getIntPtr(chunk), ctypes.c_int(len(chunk)),
                                ctypes.c_int(self.bit), getIntPtr(bi_chunk))
-            bi_im +=  "".join(bi_chunk.astype(str))
+            bi_arr = np.concatenate((bi_arr, bi_chunk))
 
-        bits = int(np.ceil(len(bi_im)/6))*6
-        bi_im_append = bi_im + ''.join(["0"]*(bits - len(bi_im)))
-        return self.binary2B64(bi_im_append)
+        bi_len = int(np.ceil(len(bi_arr)/6))*6
+        bi_arr_append = np.concatenate((bi_arr, np.array([0]*(bi_len-len(bi_arr))) )).astype(np.intc)
+        char_arr = np.array([chr(0).encode("ascii")]*int(bi_len/6))
+        clib.biArray2B64Str(getIntPtr(bi_arr_append), getCharPtr(char_arr),
+                            ctypes.c_int(bi_len))
+        return "".join([c.decode("ascii") for c in char_arr])
 
     def run(self):
         if self.channel == 1:
@@ -95,7 +103,7 @@ class Base64_2DImageEncoder:
         return self.binary2B64(self.decimal2Binary(decimal, b64byte_len*6))
 
     def binary2B64(self, binary):
-        """calculate b64 characters from a binary of length being bultiples of 6"""
+        """calculate b64 characters from a binary of length being multiples of 6"""
         if len(binary)%6 != 0:
             raise Exception("Binary served should be multiple of 6")
         b64 = []
