@@ -187,7 +187,7 @@ int str2intArray(char * c, int * int_arr, int bit_len, int str_len){
         }
         bi_arr -= 6*str_len;
         
-        // Construct operator to conver binary in to int
+        // Construct operator to convert binary in to int
         int * operator_ = malloc(bit_len * sizeof(int));
         for(i=0; i<bit_len; i++){
                 operator_[bit_len-1-i] = pow(2, i);
