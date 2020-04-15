@@ -1,19 +1,24 @@
 import numpy as np
 import ctypes
 from sys import platform
+import os
+
+root_path = os.path.abspath("./")
+print(root_path)
 
 if platform == "linux" or platform == "linux2":
     # linux
-    clib = ctypes.cdll.LoadLibrary("./c_utils.so")
+    dll_name = "c_utils.so"
 elif platform == "darwin":
     # OS X
-    clib = ctypes.cdll.LoadLibrary("./c_utils.dylib")
+    dll_name = "c_utils.dylib"
 elif platform == "win32":
     # Windows...
-    clib = ctypes.cdll.LoadLibrary("./c_utils.dll")
+    dll_name = "c_utils.dll"
 
+clib = ctypes.cdll.LoadLibrary(os.path.join(root_path, dll_name))
 
-B64_TABLE = [
+B64_TABLE =[
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",\
     "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",\
     "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "+", "/"

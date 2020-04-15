@@ -1,6 +1,5 @@
 #include "c_utils.h"
 #include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
 
 /*{{{ Encode*/
@@ -206,3 +205,7 @@ int str2intArray(char * c, int * int_arr, int bit_len, int str_len){
         free(bi_arr); free(operator_);
 }
 /*}}}*/
+
+int main() {
+    return 0;
+}
