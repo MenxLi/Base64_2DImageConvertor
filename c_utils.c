@@ -1,4 +1,3 @@
-#include "c_utils.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
