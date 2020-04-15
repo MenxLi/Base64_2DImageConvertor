@@ -30,7 +30,7 @@ int biArray2B64Str(int * bi_arr, char * dst_arr, int bi_size){
 }
 
 void bi6Digit2Char(int * bi_arr, char * buffer){
-        // conver 6 digits binary code into decimal
+        // convert 6 digits binary code into decimal
         static int operator[6] = {32, 16, 8, 4, 2, 1};
         int decimal = 0;
         for(int i=0; i < 6; i++){
