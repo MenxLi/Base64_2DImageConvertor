@@ -20,5 +20,10 @@ b64 = imgEncodeB64(im, accelerate = True)
 im_rec = imgDecodeB64(b64, accelerate = True)
 # print("Decoding time: ", time.time() - start_time)
 
+plt.subplot(121)
+plt.imshow(im)
+plt.subplot(122)
+plt.imshow(im_rec)
+plt.show()
 ```
     
