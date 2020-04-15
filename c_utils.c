@@ -203,6 +203,6 @@ int str2intArray(char * c, int * int_arr, int bit_len, int str_len){
                 accumulator = 0;
         }
 
-        /* free(bi_arr); free(operator_); */
+        free(bi_arr); free(operator_);
 }
 /*}}}*/

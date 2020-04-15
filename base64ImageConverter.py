@@ -1,5 +1,4 @@
 import numpy as np
-from printProgressBar import printProgress
 import ctypes
 from sys import platform
 
@@ -69,7 +68,7 @@ class Base64_2DImageEncoder:
         W_b64 = self.decimal2B64(self.W, Base64_2DImageEncoder.SIZE_BYTE_HALF)
         return channel_b64 + bit_b64 + H_b64 + W_b64
 
-    def encode1Channel(self, im):
+    def encode1Channel_accelerate(self, im):
         """Encode one channel image"""
         # Using ctypes
         bi_arr = np.array([])
@@ -89,15 +88,31 @@ class Base64_2DImageEncoder:
                             ctypes.c_int(bi_len))
         return "".join([c.decode("ascii") for c in char_arr])
 
-    def run(self):
+    def encode1Channel(self, im):
+        """Encode one channel image"""
+        # convert to binary
+        bi_im = ""
+        length = len(im.flatten())
+        for i in range(length) :
+            bi_im += self.decimal2Binary(im.flatten()[i], self.bit)
+        bits = int(np.ceil(len(bi_im)/6))*6
+        bi_im_append = bi_im + ''.join(["0"]*(bits - len(bi_im)))
+        return self.binary2B64(bi_im_append)
+
+
+    def __call__(self, accelerate = False):
+        if not accelerate:
+            encode1Channel = self.encode1Channel
+        else:
+            encode1Channel = self.encode1Channel_accelerate
         if self.channel == 1:
-            return self.calcHeader() + self.encode1Channel(self.img)
+            return self.calcHeader() + encode1Channel(self.img)
         elif self.channel >1:
             result = self.calcHeader()
             for i in range(self.channel):
                 if self.show_progress:
                     print("Encoding channel {} ".format(i))
-                result += self.encode1Channel(self.img[:,:,i])
+                result += encode1Channel(self.img[:,:,i])
             return result
 
     def decimal2B64(self, decimal, b64byte_len):
@@ -179,6 +194,19 @@ class Base64_2DImageDecoder:
         return header
 
     def decode1Channel(self, im_b64):
+        im_bi = ""
+        for c in im_b64:
+            im_bi += self.__b642Binary(c)
+        im_size_bi = self.H * self.W * self.bit
+        im = []
+        for i in range(0, im_size_bi, self.bit):
+            binary = im_bi[i: i+self.bit]
+            dec = self.__binary2Decimal(binary)
+            im.append(dec)
+        im = np.array(im).reshape((self.H, self.W))
+        return im
+
+    def decode1Channel_accelerate(self, im_b64):
         # Use Ctypes
         im_size = self.H * self.W
         im_plain = np.zeros(im_size, np.intc)
@@ -188,15 +216,19 @@ class Base64_2DImageDecoder:
         im = im_plain.reshape((self.H, self.W))
         return im
 
-    def run(self):
+    def __call__(self, accelerate = False):
+        if accelerate:
+            decode1Channel = self.decode1Channel_accelerate
+        else:
+            decode1Channel = self.decode1Channel
         if self.channel == 1:
-            return self.decode1Channel(self.im_b64)
+            return decode1Channel(self.im_b64)
         else:
             channels = []
             step = int(len(self.im_b64)/self.channel)
             for idx in range(0, len(self.im_b64), step):
                 im_b64 = self.im_b64[idx:idx+step]
-                channels.append(self.decode1Channel(im_b64))
+                channels.append(decode1Channel(im_b64))
             return np.concatenate([c[:,:,np.newaxis] for c in channels], axis = 2)
             #return channels
 
@@ -221,19 +253,19 @@ class Base64_2DImageDecoder:
 
 #==============================Encapsulation====================================
 
-def imgEncodeB64(img, bit = None, show_progress = False):
+def imgEncodeB64(img, bit = None, accelerate = False, show_progress = False):
     """
     Encode image in Base64 scheme
     @ img: numpy array - int
     @ bit: size for each channel of a single pixel in bit
     """
     encoder = Base64_2DImageEncoder(img, bit, show_progress)
-    return encoder.run()
+    return encoder(accelerate)
 
-def imgDecodeB64(b64_string):
+def imgDecodeB64(b64_string, accelerate = False):
     """
     Decoder for the imgEncodeB64
     @ b64_string: string encoded with imgEncodeB64()
     """
     decoder = Base64_2DImageDecoder(b64_string)
-    return decoder.run()
+    return decoder(accelerate)
