@@ -258,7 +258,7 @@ class Base64_2DImageDecoder:
 
 #==============================Encapsulation====================================
 
-def imgEncodeB64(img, bit = None, accelerate = False, show_progress = False):
+def imgEncodeB64(img, bit = None, accelerate = True, show_progress = False):
     """
     Encode image in Base64 scheme
     @ img: numpy array - int
@@ -267,7 +267,7 @@ def imgEncodeB64(img, bit = None, accelerate = False, show_progress = False):
     encoder = Base64_2DImageEncoder(img, bit, show_progress)
     return encoder(accelerate)
 
-def imgDecodeB64(b64_string, accelerate = False):
+def imgDecodeB64(b64_string, accelerate = True):
     """
     Decoder for the imgEncodeB64
     @ b64_string: string encoded with imgEncodeB64()
