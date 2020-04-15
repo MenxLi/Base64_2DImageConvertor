@@ -27,3 +27,6 @@ plt.imshow(im_rec)
 plt.show()
 ```
     
+Each pixel in the image will be converted into bits of minimum length to save the space.  
+The encoded string has a header at the beginning to record those information.  
+Thus the encoded string should be decoded only with this decoder, vise versa.
