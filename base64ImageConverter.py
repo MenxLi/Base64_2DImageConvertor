@@ -1,8 +1,18 @@
 import numpy as np
 from printProgressBar import printProgress
 import ctypes
+from sys import platform
 
-clib = ctypes.cdll.LoadLibrary("./c_utils.so")
+if platform == "linux" or platform == "linux2":
+    # linux
+    clib = ctypes.cdll.LoadLibrary("./c_utils.so")
+elif platform == "darwin":
+    # OS X
+    clib = ctypes.cdll.LoadLibrary("./c_utils.dylib")
+elif platform == "win32":
+    # Windows...
+    clib = ctypes.cdll.LoadLibrary("./c_utils.dll")
+
 
 B64_TABLE = [
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",\
@@ -61,14 +71,6 @@ class Base64_2DImageEncoder:
 
     def encode1Channel(self, im):
         """Encode one channel image"""
-        # convert to binary
-        #  bi_im = ""
-        #  length = len(im.flatten())
-        #  for i in range(length) :
-        #      bi_im += self.decimal2Binary(im.flatten()[i], self.bit)
-        #      if self.show_progress:
-        #          printProgress(i+1, length, suffix = "completed")
-
         # Using ctypes
         bi_arr = np.array([])
         step = 800      #chunk image
@@ -177,16 +179,13 @@ class Base64_2DImageDecoder:
         return header
 
     def decode1Channel(self, im_b64):
-        im_bi = ""
-        for c in im_b64:
-            im_bi += self.__b642Binary(c)
-        im_size_bi = self.H * self.W * self.bit
-        im = []
-        for i in range(0, im_size_bi, self.bit):
-            binary = im_bi[i: i+self.bit]
-            dec = self.__binary2Decimal(binary)
-            im.append(dec)
-        im = np.array(im).reshape((self.H, self.W))
+        # Use Ctypes
+        im_size = self.H * self.W
+        im_plain = np.zeros(im_size, np.intc)
+        im_b64_arr = np.array(im_b64.encode("ascii"))
+        clib.str2intArray(getCharPtr(im_b64_arr), getIntPtr(im_plain),
+                          ctypes.c_int(self.bit), len(im_b64))
+        im = im_plain.reshape((self.H, self.W))
         return im
 
     def run(self):
