@@ -1,4 +1,5 @@
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Extension
+import glob, os
 
 setup(
     name="b64ImConverter",
@@ -20,5 +21,10 @@ setup(
 
     include_package_data = True,
 
-    install_requires = ["numpy"]
+    install_requires = ["numpy"],
+
+	data_files=[
+		("b64ImConverter", ["b64ImConverter/c_utils.so", "b64ImConverter/c_utils.dll", "b64ImConverter/c_utils.dylib"])
+	]
+
 )
