@@ -1,10 +1,12 @@
+from typing import List, Union, Iterable
 import numpy as np
 import ctypes
 from sys import platform
 import os
+from .multiProcess import lisJobParallel
 
-root_path = os.path.abspath("./")
-print(root_path)
+root_path = os.path.abspath(__file__)
+root_path = os.path.dirname(root_path)
 
 if platform == "linux" or platform == "linux2":
     # linux
@@ -258,19 +260,47 @@ class Base64_2DImageDecoder:
 
 #==============================Encapsulation====================================
 
-def imgEncodeB64(img, bit = None, accelerate = True, show_progress = False):
+def imgEncodeB64(img:np.ndarray, bit:int = None, accelerate:bool = True, show_progress:bool = False) -> str:
     """
     Encode image in Base64 scheme
     @ img: numpy array - int
     @ bit: size for each channel of a single pixel in bit
     """
     encoder = Base64_2DImageEncoder(img, bit, show_progress)
-    return encoder(accelerate)
+    string = encoder(accelerate)
+    return string
 
-def imgDecodeB64(b64_string, accelerate = True):
+def imgDecodeB64(b64_string:str, accelerate:bool = True) -> np.ndarray:
     """
     Decoder for the imgEncodeB64
     @ b64_string: string encoded with imgEncodeB64()
     """
     decoder = Base64_2DImageDecoder(b64_string)
     return decoder(accelerate)
+
+def batchImgEncodeB64(imgs:Iterable, n_workers:int = -1, **kwargs) -> List[str]:
+    """
+    @ imgs: list of images to be encoded
+    @ n_workers: number of process to be used
+    return: a list of encoded string
+    """
+    def _encode(_imgs):
+        _out = []
+        for _im in _imgs:
+            _out.append(imgEncodeB64(_im, **kwargs))
+        return _out
+    return lisJobParallel(_encode, imgs, use_buffer = True, n_workers = n_workers)
+
+def batchImgDecodeB64(b64_strings:Iterable, n_workers:int = -1, **kwargs) -> List[np.ndarray]:
+    """
+    @ b64_strings: list of encoded strings to be decoded
+    @ n_workers: number of process to be used
+    return: a list of decoded images
+    """
+    def _decode(b64_strings):
+        _out = []
+        for _b64 in b64_strings:
+            _out.append(imgDecodeB64(_b64, **kwargs))
+        return _out
+    return lisJobParallel(_decode, b64_strings, n_workers)
+
